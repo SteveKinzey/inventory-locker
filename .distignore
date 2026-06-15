@@ -1,0 +1,13 @@
+.git
+.gitignore
+.distignore
+.DS_Store
+*.code-workspace
+*.zip
+dist
+node_modules
+vendor
+tests
+README.md
+languages/.DS_Store
+languages/readme *.txt
