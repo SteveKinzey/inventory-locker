@@ -1,7 +1,7 @@
 # Inventory Locker
 
 ![License](https://img.shields.io/badge/license-GPLv2-blue)
-![WordPress Tested](https://img.shields.io/badge/WordPress-6.5%2B-blue)
+![WordPress Tested](https://img.shields.io/badge/WordPress-7.0-blue)
 ![WooCommerce Compatible](https://img.shields.io/badge/WooCommerce-8.x-blue)
 ![SureCart Compatible](https://img.shields.io/badge/SureCart-Compatible-blue)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-green)
