@@ -53,7 +53,7 @@ Imagina esto: estás realizando una venta flash de unas zapatillas de edición l
 
 == Instalación ==
 
-1. Sube los archivos del plugin a `/wp-content/plugins/inventory-locker` o instálalo a través del administrador de WordPress.
+1. Sube los archivos del plugin a `/wp-content/plugins/skamerica-inventory-locker` o instálalo a través del administrador de WordPress.
 2. Actívalo a través del menú «Plugins».
 3. Ve a WooCommerce > SKAmerica Inventory Locker (o SureCart > SKAmerica Inventory Locker) para configurarlo.
 4. Establece la duración del bloqueo que desees y haz clic en «Activar plugin».

@@ -53,7 +53,7 @@ The result? 150 angry customers, cancellation emails, refund requests, negative 
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/inventory-locker`, or install through the WordPress admin.
+1. Upload the plugin files to `/wp-content/plugins/skamerica-inventory-locker`, or install through the WordPress admin.
 2. Activate through the 'Plugins' menu.
 3. Go to WooCommerce > SKAmerica Inventory Locker (or SureCart > SKAmerica Inventory Locker) to configure.
 4. Set your desired lock duration and click "Activate Plugin".
