@@ -1,7 +1,7 @@
 .git
 .gitignore
 .distignore
-.DS_Store
+**/.DS_Store
 *.code-workspace
 *.zip
 dist

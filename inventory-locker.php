@@ -1170,7 +1170,7 @@ function inventory_locker_sc_validate_stock_rest($request) {
     $quantity = inventory_locker_prepare_positive_quantity($request->get_param('quantity'));
     
     if (!$product_id || !$quantity) {
-        return new WP_REST_Response(['valid' => false, 'message' => 'Invalid parameters'], 400);
+        return new WP_REST_Response(['valid' => false, 'message' => __('Invalid parameters', 'skamerica-inventory-locker')], 400);
     }
     
     $session_id = inventory_locker_get_session_id();
@@ -1199,7 +1199,7 @@ function inventory_locker_sc_lock_stock_rest($request) {
     $quantity = inventory_locker_prepare_positive_quantity($request->get_param('quantity'));
     
     if (!$product_id || !$quantity) {
-        return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
+        return new WP_REST_Response(['success' => false, 'message' => __('Invalid parameters', 'skamerica-inventory-locker')], 400);
     }
     
     $session_id = inventory_locker_get_session_id();
@@ -1230,14 +1230,14 @@ function inventory_locker_sc_release_stock_rest($request) {
     $quantity = $request->get_param('quantity');
     
     if (!$product_id) {
-        return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
+        return new WP_REST_Response(['success' => false, 'message' => __('Invalid parameters', 'skamerica-inventory-locker')], 400);
     }
 
     if ($quantity !== null && $quantity !== '') {
         $quantity = inventory_locker_prepare_positive_quantity($quantity);
 
         if (!$quantity) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
+            return new WP_REST_Response(['success' => false, 'message' => __('Invalid parameters', 'skamerica-inventory-locker')], 400);
         }
     } else {
         $quantity = null;
@@ -1254,7 +1254,7 @@ function inventory_locker_sc_release_stock_rest($request) {
 function inventory_locker_sc_release_session_locks_rest($request) {
     $session_id = inventory_locker_get_session_id();
     if (!$session_id) {
-        return new WP_REST_Response(['success' => false, 'message' => 'No active session'], 400);
+        return new WP_REST_Response(['success' => false, 'message' => __('No active session', 'skamerica-inventory-locker')], 400);
     }
 
     $tracked = get_option('inventory_locker_tracked_products', get_option('wc_inventory_locker_tracked_products', []));
@@ -1301,16 +1301,18 @@ function inventory_locker_sc_print_inline_script() {
  * Get inline JavaScript for SureCart integration.
  */
 function inventory_locker_sc_get_inline_script() {
-    $rest_url = rest_url('inventory-locker/v1/');
-    $nonce = wp_create_nonce('wp_rest');
+    $rest_url = wp_json_encode(rest_url('inventory-locker/v1/'));
+    $nonce = wp_json_encode(wp_create_nonce('wp_rest'));
+    $unavailable_message = wp_json_encode(__('This item is no longer available.', 'skamerica-inventory-locker'));
     
     return "
     (function() {
         if (typeof window.inventoryLocker !== 'undefined') return;
         
         window.inventoryLocker = {
-            restUrl: '{$rest_url}',
-            nonce: '{$nonce}',
+            restUrl: {$rest_url},
+            nonce: {$nonce},
+            unavailableMessage: {$unavailable_message},
             
             validateStock: async function(productId, quantity) {
                 try {
@@ -1450,13 +1452,13 @@ function inventory_locker_sc_get_inline_script() {
 
             const validation = await window.inventoryLocker.validateStock(productId, quantity);
             if (validation && validation.valid === false) {
-                alert(validation.message || 'This item is no longer available.');
+                alert(validation.message || window.inventoryLocker.unavailableMessage);
                 return;
             }
 
             const lock = await window.inventoryLocker.lockStock(productId, quantity);
             if (lock && lock.success === false) {
-                alert(lock.message || 'This item is no longer available.');
+                alert(lock.message || window.inventoryLocker.unavailableMessage);
                 return;
             }
 

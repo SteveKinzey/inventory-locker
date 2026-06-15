@@ -139,4 +139,4 @@ POST /wp-json/inventory-locker/v1/release-stock
 ## 📄 License
 
 This plugin is licensed under the GNU General Public License v2.0 or later.  
-See [LICENSE.txt](LICENSE.txt) for full license text.
+See [LICENSE](LICENSE) for full license text.
