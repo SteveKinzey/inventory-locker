@@ -3,7 +3,7 @@
  * Plugin Name: Inventory Locker
  * Plugin URI: https://github.com/SteveKinzey/inventory-locker
  * Description: Locks inventory when a product is added to the cart, preventing overselling during high-demand periods. Supports WooCommerce and SureCart.
- * Version: 2.3.0
+ * Version: 2.3.1
  * Author: Steve Kinzey
  * Author URI: https://sk-america.com
  * License: GPLv2 or later
@@ -16,7 +16,7 @@
 
 defined('ABSPATH') || exit;
 
-define('INVENTORY_LOCKER_VERSION', '2.3.0');
+define('INVENTORY_LOCKER_VERSION', '2.3.1');
 define('INVENTORY_LOCKER_DEFAULT_DURATION', 15);
 define('INVENTORY_LOCKER_FILE', __FILE__);
 
@@ -1080,6 +1080,12 @@ function inventory_locker_sc_register_rest_routes() {
         'callback' => 'inventory_locker_sc_release_stock_rest',
         'permission_callback' => 'inventory_locker_rest_permission_check',
     ]);
+
+    register_rest_route('inventory-locker/v1', '/release-session-locks', [
+        'methods' => 'POST',
+        'callback' => 'inventory_locker_sc_release_session_locks_rest',
+        'permission_callback' => 'inventory_locker_rest_permission_check',
+    ]);
 }
 
 /**
@@ -1214,6 +1220,32 @@ function inventory_locker_sc_release_stock_rest($request) {
 }
 
 /**
+ * REST endpoint to release all SureCart locks for the current session.
+ */
+function inventory_locker_sc_release_session_locks_rest($request) {
+    $session_id = inventory_locker_get_session_id();
+    if (!$session_id) {
+        return new WP_REST_Response(['success' => false, 'message' => 'No active session'], 400);
+    }
+
+    $tracked = get_option('inventory_locker_tracked_products', get_option('wc_inventory_locker_tracked_products', []));
+    foreach ($tracked as $product_id) {
+        if (strpos($product_id, 'sc_') !== 0) {
+            continue;
+        }
+
+        $locks = inventory_locker_get_product_locks($product_id);
+        if (isset($locks[$session_id])) {
+            unset($locks[$session_id]);
+            inventory_locker_save_product_locks($product_id, $locks);
+            do_action('inventory_locker_stock_restored', $product_id);
+        }
+    }
+
+    return new WP_REST_Response(['success' => true], 200);
+}
+
+/**
  * Enqueue SureCart frontend JavaScript for stock validation.
  */
 add_action('wp_enqueue_scripts', 'inventory_locker_sc_enqueue_scripts');
@@ -1224,6 +1256,16 @@ function inventory_locker_sc_enqueue_scripts() {
     }
     
     wp_add_inline_script('surecart', inventory_locker_sc_get_inline_script(), 'after');
+}
+
+add_action('wp_footer', 'inventory_locker_sc_print_inline_script');
+
+function inventory_locker_sc_print_inline_script() {
+    if (!inventory_locker_surecart_active() || !inventory_locker_should_run()) {
+        return;
+    }
+
+    wp_print_inline_script_tag(inventory_locker_sc_get_inline_script(), ['id' => 'inventory-locker-surecart-js']);
 }
 
 /**
@@ -1290,19 +1332,149 @@ function inventory_locker_sc_get_inline_script() {
                     console.error('Inventory Locker release error:', e);
                     return { success: false };
                 }
+            },
+
+            releaseSessionLocks: async function() {
+                try {
+                    const response = await fetch(this.restUrl + 'release-session-locks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-WP-Nonce': this.nonce
+                        }
+                    });
+                    return await response.json();
+                } catch (e) {
+                    console.error('Inventory Locker session release error:', e);
+                    return { success: false };
+                }
+            },
+
+            getStoredLocks: function() {
+                try {
+                    return JSON.parse(sessionStorage.getItem('inventoryLockerLocks') || '{}');
+                } catch (e) {
+                    return {};
+                }
+            },
+
+            storeLock: function(productId, quantity) {
+                const locks = this.getStoredLocks();
+                locks[productId] = (parseInt(locks[productId] || 0, 10) || 0) + quantity;
+                sessionStorage.setItem('inventoryLockerLocks', JSON.stringify(locks));
+            },
+
+            clearStoredLock: function(productId) {
+                const locks = this.getStoredLocks();
+                delete locks[productId];
+                sessionStorage.setItem('inventoryLockerLocks', JSON.stringify(locks));
+            },
+
+            releaseStoredLocks: async function() {
+                const locks = this.getStoredLocks();
+                const productIds = Object.keys(locks);
+
+                for (const productId of productIds) {
+                    await this.releaseStock(productId, null);
+                    this.clearStoredLock(productId);
+                }
             }
         };
         
-        document.addEventListener('surecart:cart:item:added', function(e) {
+        document.addEventListener('surecart:cart:item:added', async function(e) {
             if (e.detail && e.detail.price && e.detail.price.product_id) {
-                window.inventoryLocker.lockStock(e.detail.price.product_id, e.detail.quantity || 1);
+                const productId = e.detail.price.product_id;
+                const quantity = e.detail.quantity || 1;
+                const lock = await window.inventoryLocker.lockStock(productId, quantity);
+                if (!lock || lock.success !== false) {
+                    window.inventoryLocker.storeLock(productId, quantity);
+                }
             }
         });
+
+        document.addEventListener('submit', async function(e) {
+            const form = e.target && e.target.closest('[data-wp-interactive*=\"surecart/product-page\"][data-wp-context]');
+            if (!form) return;
+
+            if (form.dataset.inventoryLockerSubmitting === '1') {
+                delete form.dataset.inventoryLockerSubmitting;
+                return;
+            }
+
+            let context = {};
+            try {
+                context = JSON.parse(form.getAttribute('data-wp-context') || '{}');
+            } catch (error) {
+                return;
+            }
+
+            const productId = context.product && context.product.id;
+            const quantityInput = form.querySelector('input[type=\"number\"], input[name=\"quantity\"]');
+            const quantity = parseInt((quantityInput && quantityInput.value) || context.quantity || 1, 10);
+
+            if (!productId || quantity < 1) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const validation = await window.inventoryLocker.validateStock(productId, quantity);
+            if (validation && validation.valid === false) {
+                alert(validation.message || 'This item is no longer available.');
+                return;
+            }
+
+            const lock = await window.inventoryLocker.lockStock(productId, quantity);
+            if (lock && lock.success === false) {
+                alert(lock.message || 'This item is no longer available.');
+                return;
+            }
+
+            window.inventoryLocker.storeLock(productId, quantity);
+
+            form.dataset.inventoryLockerSubmitting = '1';
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit(e.submitter || undefined);
+            } else if (e.submitter) {
+                e.submitter.click();
+            }
+        }, true);
         
         document.addEventListener('surecart:cart:item:removed', function(e) {
             if (e.detail && e.detail.price && e.detail.price.product_id) {
-                window.inventoryLocker.releaseStock(e.detail.price.product_id, e.detail.quantity || null);
+                const productId = e.detail.price.product_id;
+                window.inventoryLocker.releaseStock(productId, e.detail.quantity || null);
+                window.inventoryLocker.clearStoredLock(productId);
             }
+        });
+
+        document.addEventListener('click', function(e) {
+            const button = e.target && e.target.closest('button');
+            if (!button) return;
+
+            const label = (button.getAttribute('aria-label') || button.textContent || '').trim();
+            if (!/^Remove\\b/i.test(label)) return;
+
+            window.inventoryLocker.releaseSessionLocks();
+            window.inventoryLocker.releaseStoredLocks();
+        }, true);
+
+        let inventoryLockerReleaseTimer = null;
+        const inventoryLockerMaybeReleaseEmptyCart = function() {
+            if (document.querySelector('.sc-product-line-item')) {
+                return;
+            }
+
+            clearTimeout(inventoryLockerReleaseTimer);
+            inventoryLockerReleaseTimer = setTimeout(function() {
+                window.inventoryLocker.releaseSessionLocks();
+            }, 250);
+        };
+
+        new MutationObserver(inventoryLockerMaybeReleaseEmptyCart).observe(document.body, {
+            childList: true,
+            subtree: true
         });
         
         document.addEventListener('surecart:checkout:success', function(e) {

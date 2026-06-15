@@ -5,7 +5,7 @@ Tags: woocommerce, surecart, inventory, cart, stock management, reserve stock, l
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,10 @@ Yes! Version 2.0+ supports both WooCommerce and SureCart with automatic platform
 
 == Changelog ==
 
+= 2.3.1 =
+* Fixed SureCart 4.4+ product-page integration so stock locks are created before add-to-cart.
+* Added current-session lock release for SureCart cart removals.
+
 = 2.3.0 =
 * Security: Added nonce verification to REST API endpoints
 * Security: Added rate limiting (30 requests/minute per IP) to prevent bot abuse
@@ -140,6 +144,9 @@ Yes! Version 2.0+ supports both WooCommerce and SureCart with automatic platform
 * Initial stable release
 
 == Upgrade Notice ==
+
+= 2.3.1 =
+SureCart compatibility update. Recommended for stores using SureCart product pages.
 
 = 2.3.0 =
 Security update: Adds bot protection and rate limiting to REST endpoints. Recommended for all users.
