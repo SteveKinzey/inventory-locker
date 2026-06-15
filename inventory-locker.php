@@ -10,8 +10,8 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: inventory-locker
  * Domain Path: /languages
- * GitHub Plugin URI: https://github.com/SteveKinzey/inventory-locker
- * Primary Branch: main
+ * Requires at least: 5.8
+ * Requires PHP: 7.4
  */
 
 defined('ABSPATH') || exit;
@@ -887,20 +887,6 @@ function wc_inventory_locker_maybe_cleanup_on_session_change($set) {
     if (!$set) {
         $session_id = wc_inventory_locker_get_session_id();
         wc_inventory_locker_cleanup_session_locks($session_id);
-    }
-}
-
-add_action('admin_notices', 'inventory_locker_github_updater_notice');
-
-function inventory_locker_github_updater_notice() {
-    if (!is_admin() || !current_user_can('manage_options')) return;
-    
-    if (!inventory_locker_is_configured()) return;
-
-    if (!class_exists('GitHub_Updater\Bootstrap') && !class_exists('github_updater')) {
-        echo '<div class="notice notice-info is-dismissible">';
-        echo '<p><strong>Inventory Locker:</strong> To enable automatic updates, install the <a href="https://github.com/afragen/github-updater" target="_blank">GitHub Updater plugin</a>.</p>';
-        echo '</div>';
     }
 }
 

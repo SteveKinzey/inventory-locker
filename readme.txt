@@ -83,12 +83,6 @@ Yes! Version 2.0+ supports both WooCommerce and SureCart with automatic platform
 * High-value items: 30-60 minutes
 * B2B / Quote-based: 60+ minutes
 
-== Screenshots ==
-
-1. Admin settings page showing lock configuration
-2. Active locks monitoring dashboard
-3. Customer notification when stock is limited
-
 == Changelog ==
 
 = 2.3.1 =
