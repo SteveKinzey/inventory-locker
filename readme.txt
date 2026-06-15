@@ -1,7 +1,7 @@
 === Inventory Locker ===
 Contributors: stevekinzey
 Donate link: https://sk-america.com
-Tags: woocommerce, surecart, inventory, cart, stock management, reserve stock, lock stock, overselling
+Tags: woocommerce, surecart, inventory, stock management, overselling
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4

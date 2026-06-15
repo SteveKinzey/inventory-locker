@@ -21,14 +21,6 @@ define('INVENTORY_LOCKER_DEFAULT_DURATION', 15);
 define('INVENTORY_LOCKER_FILE', __FILE__);
 
 /**
- * Load plugin textdomain for translations.
- */
-add_action('init', 'inventory_locker_load_textdomain');
-function inventory_locker_load_textdomain() {
-    load_plugin_textdomain('inventory-locker', false, dirname(plugin_basename(__FILE__)) . '/languages');
-}
-
-/**
  * ============================================================================
  * PLATFORM DETECTION
  * ============================================================================
@@ -110,14 +102,14 @@ function inventory_locker_get_session_id() {
             return 'sc_user_' . get_current_user_id();
         }
         if (isset($_COOKIE['sc_customer_id'])) {
-            return 'sc_' . sanitize_text_field($_COOKIE['sc_customer_id']);
+            return 'sc_' . sanitize_text_field(wp_unslash($_COOKIE['sc_customer_id']));
         }
         if (!isset($_COOKIE['inventory_locker_session'])) {
             $session_id = wp_generate_uuid4();
             setcookie('inventory_locker_session', $session_id, time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true);
             $_COOKIE['inventory_locker_session'] = $session_id;
         }
-        return 'sc_' . sanitize_text_field($_COOKIE['inventory_locker_session']);
+        return 'sc_' . sanitize_text_field(wp_unslash($_COOKIE['inventory_locker_session']));
     }
     
     return null;
@@ -155,7 +147,7 @@ function inventory_locker_admin_menu() {
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'inventory_locker_settings_link');
 
 function inventory_locker_settings_link($links) {
-    $settings_link = '<a href="' . admin_url('admin.php?page=inventory-locker') . '">' . __('Settings', 'inventory-locker') . '</a>';
+    $settings_link = '<a href="' . esc_url(admin_url('admin.php?page=inventory-locker')) . '">' . esc_html__('Settings', 'inventory-locker') . '</a>';
     array_unshift($links, $settings_link);
     return $links;
 }
@@ -165,7 +157,7 @@ function inventory_locker_settings_link($links) {
  */
 function inventory_locker_settings_page() {
     if (!current_user_can('manage_options')) {
-        wp_die(__('You do not have sufficient permissions to access this page.', 'inventory-locker'));
+        wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'inventory-locker'));
     }
     
     $message = '';
@@ -174,10 +166,13 @@ function inventory_locker_settings_page() {
     $is_configured = inventory_locker_is_configured();
     $active_platforms = inventory_locker_get_active_platforms();
     
-    if (isset($_POST['inventory_locker_save']) && wp_verify_nonce($_POST['inventory_locker_nonce'], 'inventory_locker_settings')) {
-        $new_duration = isset($_POST['lock_duration']) ? intval($_POST['lock_duration']) : INVENTORY_LOCKER_DEFAULT_DURATION;
+    $nonce = isset($_POST['inventory_locker_nonce']) ? sanitize_text_field(wp_unslash($_POST['inventory_locker_nonce'])) : '';
+
+    if (isset($_POST['inventory_locker_save']) && wp_verify_nonce($nonce, 'inventory_locker_settings')) {
+        $new_duration = isset($_POST['lock_duration']) ? intval(wp_unslash($_POST['lock_duration'])) : INVENTORY_LOCKER_DEFAULT_DURATION;
         // Password is intentionally not sanitized to preserve special characters
         // It's only used for wp_check_password() and immediately discarded
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         $password = isset($_POST['admin_password']) ? wp_unslash($_POST['admin_password']) : '';
         
         if ($new_duration < 1 || $new_duration > 1440) {
@@ -213,17 +208,17 @@ function inventory_locker_settings_page() {
     
     ?>
     <div class="wrap">
-        <h1><?php _e('Inventory Locker Settings', 'inventory-locker'); ?></h1>
+        <h1><?php esc_html_e('Inventory Locker Settings', 'inventory-locker'); ?></h1>
         
         <?php if (empty($active_platforms)): ?>
         <div class="notice notice-error">
-            <p><strong><?php _e('No E-commerce Platform Detected:', 'inventory-locker'); ?></strong> <?php _e('Please install and activate WooCommerce or SureCart.', 'inventory-locker'); ?></p>
+            <p><strong><?php esc_html_e('No E-commerce Platform Detected:', 'inventory-locker'); ?></strong> <?php esc_html_e('Please install and activate WooCommerce or SureCart.', 'inventory-locker'); ?></p>
         </div>
         <?php endif; ?>
         
         <?php if (!$is_configured): ?>
         <div class="notice notice-warning">
-            <p><strong><?php _e('Setup Required:', 'inventory-locker'); ?></strong> <?php _e('Please configure the lock duration to activate the plugin.', 'inventory-locker'); ?></p>
+            <p><strong><?php esc_html_e('Setup Required:', 'inventory-locker'); ?></strong> <?php esc_html_e('Please configure the lock duration to activate the plugin.', 'inventory-locker'); ?></p>
         </div>
         <?php endif; ?>
         
@@ -240,10 +235,10 @@ function inventory_locker_settings_page() {
         <?php endif; ?>
         
         <div class="card" style="max-width: 600px; padding: 20px; margin-top: 20px;">
-            <h2 style="margin-top: 0;"><?php _e('Current Status', 'inventory-locker'); ?></h2>
+            <h2 style="margin-top: 0;"><?php esc_html_e('Current Status', 'inventory-locker'); ?></h2>
             <table class="form-table">
                 <tr>
-                    <th><?php _e('Active Platforms', 'inventory-locker'); ?></th>
+                    <th><?php esc_html_e('Active Platforms', 'inventory-locker'); ?></th>
                     <td>
                         <?php if (in_array('woocommerce', $active_platforms)): ?>
                         <span style="color: green; font-weight: bold;">● WooCommerce</span><br>
@@ -252,31 +247,31 @@ function inventory_locker_settings_page() {
                         <span style="color: green; font-weight: bold;">● SureCart</span><br>
                         <?php endif; ?>
                         <?php if (empty($active_platforms)): ?>
-                        <span style="color: red; font-weight: bold;">● <?php _e('None detected', 'inventory-locker'); ?></span>
+                        <span style="color: red; font-weight: bold;">● <?php esc_html_e('None detected', 'inventory-locker'); ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
                 <tr>
-                    <th><?php _e('Lock Duration', 'inventory-locker'); ?></th>
-                    <td><strong><?php echo esc_html($current_duration); ?> <?php _e('minutes', 'inventory-locker'); ?></strong></td>
+                    <th><?php esc_html_e('Lock Duration', 'inventory-locker'); ?></th>
+                    <td><strong><?php echo esc_html($current_duration); ?> <?php esc_html_e('minutes', 'inventory-locker'); ?></strong></td>
                 </tr>
                 <tr>
-                    <th><?php _e('Active Locks', 'inventory-locker'); ?></th>
-                    <td><strong><?php echo esc_html($active_locks_count); ?></strong> <?php _e('items currently reserved', 'inventory-locker'); ?></td>
+                    <th><?php esc_html_e('Active Locks', 'inventory-locker'); ?></th>
+                    <td><strong><?php echo esc_html($active_locks_count); ?></strong> <?php esc_html_e('items currently reserved', 'inventory-locker'); ?></td>
                 </tr>
                 <tr>
-                    <th><?php _e('Products with Locks', 'inventory-locker'); ?></th>
-                    <td><strong><?php echo count($tracked_products); ?></strong></td>
+                    <th><?php esc_html_e('Products with Locks', 'inventory-locker'); ?></th>
+                    <td><strong><?php echo esc_html(count($tracked_products)); ?></strong></td>
                 </tr>
                 <tr>
-                    <th><?php _e('Plugin Status', 'inventory-locker'); ?></th>
+                    <th><?php esc_html_e('Plugin Status', 'inventory-locker'); ?></th>
                     <td>
                         <?php if ($is_configured && !empty($active_platforms)): ?>
-                        <span style="color: green; font-weight: bold;">● <?php _e('Active', 'inventory-locker'); ?></span>
+                        <span style="color: green; font-weight: bold;">● <?php esc_html_e('Active', 'inventory-locker'); ?></span>
                         <?php elseif ($is_configured && empty($active_platforms)): ?>
-                        <span style="color: red; font-weight: bold;">● <?php _e('No Platform', 'inventory-locker'); ?></span>
+                        <span style="color: red; font-weight: bold;">● <?php esc_html_e('No Platform', 'inventory-locker'); ?></span>
                         <?php else: ?>
-                        <span style="color: orange; font-weight: bold;">● <?php _e('Pending Configuration', 'inventory-locker'); ?></span>
+                        <span style="color: orange; font-weight: bold;">● <?php esc_html_e('Pending Configuration', 'inventory-locker'); ?></span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -284,7 +279,7 @@ function inventory_locker_settings_page() {
         </div>
         
         <div class="card" style="max-width: 600px; padding: 20px; margin-top: 20px;">
-            <h2 style="margin-top: 0;"><?php echo $is_configured ? __('Update Settings', 'inventory-locker') : __('Initial Setup', 'inventory-locker'); ?></h2>
+            <h2 style="margin-top: 0;"><?php echo esc_html($is_configured ? __('Update Settings', 'inventory-locker') : __('Initial Setup', 'inventory-locker')); ?></h2>
             
             <form method="post" action="">
                 <?php wp_nonce_field('inventory_locker_settings', 'inventory_locker_nonce'); ?>
@@ -292,45 +287,45 @@ function inventory_locker_settings_page() {
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="lock_duration"><?php _e('Lock Duration (minutes)', 'inventory-locker'); ?></label>
+                            <label for="lock_duration"><?php esc_html_e('Lock Duration (minutes)', 'inventory-locker'); ?></label>
                         </th>
                         <td>
                             <input type="number" id="lock_duration" name="lock_duration" value="<?php echo esc_attr($current_duration); ?>" min="1" max="1440" class="small-text" required />
-                            <p class="description"><?php _e('How long inventory is reserved when added to cart. Recommended: 10-30 minutes.', 'inventory-locker'); ?></p>
+                            <p class="description"><?php esc_html_e('How long inventory is reserved when added to cart. Recommended: 10-30 minutes.', 'inventory-locker'); ?></p>
                         </td>
                     </tr>
                     
                     <?php if ($is_configured): ?>
                     <tr>
                         <th scope="row">
-                            <label for="admin_password"><?php _e('Confirm Password', 'inventory-locker'); ?></label>
+                            <label for="admin_password"><?php esc_html_e('Confirm Password', 'inventory-locker'); ?></label>
                         </th>
                         <td>
                             <input type="password" id="admin_password" name="admin_password" class="regular-text" required />
-                            <p class="description"><?php _e('Enter your WordPress password to confirm changes.', 'inventory-locker'); ?></p>
+                            <p class="description"><?php esc_html_e('Enter your WordPress password to confirm changes.', 'inventory-locker'); ?></p>
                         </td>
                     </tr>
                     <?php endif; ?>
                 </table>
                 
                 <p class="submit">
-                    <input type="submit" name="inventory_locker_save" class="button button-primary" value="<?php echo $is_configured ? __('Update Settings', 'inventory-locker') : __('Activate Plugin', 'inventory-locker'); ?>" />
+                    <input type="submit" name="inventory_locker_save" class="button button-primary" value="<?php echo esc_attr($is_configured ? __('Update Settings', 'inventory-locker') : __('Activate Plugin', 'inventory-locker')); ?>" />
                 </p>
             </form>
         </div>
         
         <div class="card" style="max-width: 600px; padding: 20px; margin-top: 20px;">
-            <h2 style="margin-top: 0;"><?php _e('How It Works', 'inventory-locker'); ?></h2>
+            <h2 style="margin-top: 0;"><?php esc_html_e('How It Works', 'inventory-locker'); ?></h2>
             <ul style="list-style: disc; margin-left: 20px;">
-                <li><?php _e('When a customer adds a product to their cart, the inventory is temporarily "locked" for them.', 'inventory-locker'); ?></li>
-                <li><?php _e('Other customers cannot add more than the available (unlocked) stock.', 'inventory-locker'); ?></li>
-                <li><?php _e('Locks automatically expire after the configured duration if the customer doesn\'t complete checkout.', 'inventory-locker'); ?></li>
-                <li><?php _e('Locks are released immediately when items are removed from cart or checkout is completed.', 'inventory-locker'); ?></li>
+                <li><?php esc_html_e('When a customer adds a product to their cart, the inventory is temporarily "locked" for them.', 'inventory-locker'); ?></li>
+                <li><?php esc_html_e('Other customers cannot add more than the available (unlocked) stock.', 'inventory-locker'); ?></li>
+                <li><?php esc_html_e('Locks automatically expire after the configured duration if the customer doesn\'t complete checkout.', 'inventory-locker'); ?></li>
+                <li><?php esc_html_e('Locks are released immediately when items are removed from cart or checkout is completed.', 'inventory-locker'); ?></li>
             </ul>
-            <h3><?php _e('Supported Platforms', 'inventory-locker'); ?></h3>
+            <h3><?php esc_html_e('Supported Platforms', 'inventory-locker'); ?></h3>
             <ul style="list-style: disc; margin-left: 20px;">
-                <li><strong>WooCommerce</strong> - <?php _e('Full support for simple and variable products', 'inventory-locker'); ?></li>
-                <li><strong>SureCart</strong> - <?php _e('Support for products with stock management enabled', 'inventory-locker'); ?></li>
+                <li><strong>WooCommerce</strong> - <?php esc_html_e('Full support for simple and variable products', 'inventory-locker'); ?></li>
+                <li><strong>SureCart</strong> - <?php esc_html_e('Support for products with stock management enabled', 'inventory-locker'); ?></li>
             </ul>
         </div>
     </div>
@@ -359,9 +354,9 @@ function inventory_locker_setup_notice() {
     ?>
     <div class="notice notice-warning">
         <p>
-            <strong><?php _e('Inventory Locker:', 'inventory-locker'); ?></strong>
-            <?php _e('Please complete the initial setup to activate inventory locking.', 'inventory-locker'); ?>
-            <a href="<?php echo admin_url('admin.php?page=inventory-locker'); ?>" class="button button-primary" style="margin-left: 10px;"><?php _e('Configure Now', 'inventory-locker'); ?></a>
+            <strong><?php esc_html_e('Inventory Locker:', 'inventory-locker'); ?></strong>
+            <?php esc_html_e('Please complete the initial setup to activate inventory locking.', 'inventory-locker'); ?>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=inventory-locker')); ?>" class="button button-primary" style="margin-left: 10px;"><?php esc_html_e('Configure Now', 'inventory-locker'); ?></a>
         </p>
     </div>
     <?php
@@ -510,7 +505,8 @@ function wc_inventory_locker_validate_add_to_cart($passed, $product_id, $quantit
     if ($total_requested > $available) {
         wc_add_notice(
             sprintf(
-                __('Sorry, only %d units of "%s" are currently available. Other customers have items reserved in their carts.', 'inventory-locker'),
+                /* translators: 1: available stock quantity, 2: product name. */
+                __('Sorry, only %1$d units of "%2$s" are currently available. Other customers have items reserved in their carts.', 'inventory-locker'),
                 $available,
                 $product->get_name()
             ),
@@ -769,7 +765,8 @@ function wc_inventory_locker_validate_cart_update($passed, $cart_item_key, $valu
     if ($total_requested > $available) {
         wc_add_notice(
             sprintf(
-                __('Sorry, only %d units of "%s" are currently available. Other customers have items reserved in their carts.', 'inventory-locker'),
+                /* translators: 1: available stock quantity, 2: product name. */
+                __('Sorry, only %1$d units of "%2$s" are currently available. Other customers have items reserved in their carts.', 'inventory-locker'),
                 $available,
                 $product->get_name()
             ),
@@ -1117,7 +1114,7 @@ function inventory_locker_get_client_ip() {
     
     foreach ($ip_keys as $key) {
         if (!empty($_SERVER[$key])) {
-            $ip = $_SERVER[$key];
+            $ip = sanitize_text_field(wp_unslash($_SERVER[$key]));
             // Handle comma-separated IPs (X-Forwarded-For)
             if (strpos($ip, ',') !== false) {
                 $ip = trim(explode(',', $ip)[0]);
@@ -1135,8 +1132,8 @@ function inventory_locker_get_client_ip() {
  * REST endpoint to validate stock availability.
  */
 function inventory_locker_sc_validate_stock_rest($request) {
-    $product_id = $request->get_param('product_id');
-    $quantity = intval($request->get_param('quantity'));
+    $product_id = sanitize_text_field($request->get_param('product_id'));
+    $quantity = absint($request->get_param('quantity'));
     
     if (!$product_id || $quantity < 1) {
         return new WP_REST_Response(['valid' => false, 'message' => 'Invalid parameters'], 400);
@@ -1150,6 +1147,7 @@ function inventory_locker_sc_validate_stock_rest($request) {
             'valid' => false,
             'available' => $available,
             'message' => sprintf(
+                /* translators: %d: available stock quantity. */
                 __('Sorry, only %d units are currently available. Other customers have items reserved.', 'inventory-locker'),
                 $available
             ),
@@ -1163,8 +1161,8 @@ function inventory_locker_sc_validate_stock_rest($request) {
  * REST endpoint to lock stock.
  */
 function inventory_locker_sc_lock_stock_rest($request) {
-    $product_id = $request->get_param('product_id');
-    $quantity = intval($request->get_param('quantity'));
+    $product_id = sanitize_text_field($request->get_param('product_id'));
+    $quantity = absint($request->get_param('quantity'));
     
     if (!$product_id || $quantity < 1) {
         return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
@@ -1178,6 +1176,7 @@ function inventory_locker_sc_lock_stock_rest($request) {
             'success' => false,
             'available' => $available,
             'message' => sprintf(
+                /* translators: %d: available stock quantity. */
                 __('Sorry, only %d units are currently available.', 'inventory-locker'),
                 $available
             ),
@@ -1193,14 +1192,14 @@ function inventory_locker_sc_lock_stock_rest($request) {
  * REST endpoint to release stock.
  */
 function inventory_locker_sc_release_stock_rest($request) {
-    $product_id = $request->get_param('product_id');
+    $product_id = sanitize_text_field($request->get_param('product_id'));
     $quantity = $request->get_param('quantity');
     
     if (!$product_id) {
         return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
     }
     
-    inventory_locker_sc_release_lock($product_id, $quantity ? intval($quantity) : null);
+    inventory_locker_sc_release_lock($product_id, $quantity ? absint($quantity) : null);
     
     return new WP_REST_Response(['success' => true], 200);
 }
