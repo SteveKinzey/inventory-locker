@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Inventory Locker
+ * Plugin Name: SKAmerica Inventory Locker
  * Plugin URI: https://github.com/SteveKinzey/inventory-locker
  * Description: Locks inventory when a product is added to the cart, preventing overselling during high-demand periods. Supports WooCommerce and SureCart.
  * Version: 2.3.1
@@ -133,8 +133,8 @@ function inventory_locker_admin_menu() {
     
     add_submenu_page(
         $parent_slug,
-        __('Inventory Locker Settings', 'inventory-locker'),
-        __('Inventory Locker', 'inventory-locker'),
+        __('SKAmerica Inventory Locker Settings', 'inventory-locker'),
+        __('SKAmerica Inventory Locker', 'inventory-locker'),
         $capability,
         'inventory-locker',
         'inventory_locker_settings_page'
@@ -208,7 +208,7 @@ function inventory_locker_settings_page() {
     
     ?>
     <div class="wrap">
-        <h1><?php esc_html_e('Inventory Locker Settings', 'inventory-locker'); ?></h1>
+        <h1><?php esc_html_e('SKAmerica Inventory Locker Settings', 'inventory-locker'); ?></h1>
         
         <?php if (empty($active_platforms)): ?>
         <div class="notice notice-error">
@@ -354,7 +354,7 @@ function inventory_locker_setup_notice() {
     ?>
     <div class="notice notice-warning">
         <p>
-            <strong><?php esc_html_e('Inventory Locker:', 'inventory-locker'); ?></strong>
+            <strong><?php esc_html_e('SKAmerica Inventory Locker:', 'inventory-locker'); ?></strong>
             <?php esc_html_e('Please complete the initial setup to activate inventory locking.', 'inventory-locker'); ?>
             <a href="<?php echo esc_url(admin_url('admin.php?page=inventory-locker')); ?>" class="button button-primary" style="margin-left: 10px;"><?php esc_html_e('Configure Now', 'inventory-locker'); ?></a>
         </p>
@@ -1129,13 +1129,47 @@ function inventory_locker_get_client_ip() {
 }
 
 /**
+ * Validate and normalize SureCart product IDs accepted by the public REST endpoints.
+ */
+function inventory_locker_sc_prepare_product_id($product_id) {
+    $product_id = sanitize_text_field($product_id);
+
+    if ($product_id === '' || strlen($product_id) > 128) {
+        return false;
+    }
+
+    if (!preg_match('/^[A-Za-z0-9_-]+$/', $product_id)) {
+        return false;
+    }
+
+    return $product_id;
+}
+
+/**
+ * Validate and normalize positive integer quantities accepted by REST endpoints.
+ */
+function inventory_locker_prepare_positive_quantity($quantity) {
+    if (is_int($quantity)) {
+        return $quantity > 0 ? $quantity : false;
+    }
+
+    if (!is_string($quantity) || !ctype_digit($quantity)) {
+        return false;
+    }
+
+    $quantity = absint($quantity);
+
+    return $quantity > 0 ? $quantity : false;
+}
+
+/**
  * REST endpoint to validate stock availability.
  */
 function inventory_locker_sc_validate_stock_rest($request) {
-    $product_id = sanitize_text_field($request->get_param('product_id'));
-    $quantity = absint($request->get_param('quantity'));
+    $product_id = inventory_locker_sc_prepare_product_id($request->get_param('product_id'));
+    $quantity = inventory_locker_prepare_positive_quantity($request->get_param('quantity'));
     
-    if (!$product_id || $quantity < 1) {
+    if (!$product_id || !$quantity) {
         return new WP_REST_Response(['valid' => false, 'message' => 'Invalid parameters'], 400);
     }
     
@@ -1161,10 +1195,10 @@ function inventory_locker_sc_validate_stock_rest($request) {
  * REST endpoint to lock stock.
  */
 function inventory_locker_sc_lock_stock_rest($request) {
-    $product_id = sanitize_text_field($request->get_param('product_id'));
-    $quantity = absint($request->get_param('quantity'));
+    $product_id = inventory_locker_sc_prepare_product_id($request->get_param('product_id'));
+    $quantity = inventory_locker_prepare_positive_quantity($request->get_param('quantity'));
     
-    if (!$product_id || $quantity < 1) {
+    if (!$product_id || !$quantity) {
         return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
     }
     
@@ -1192,14 +1226,24 @@ function inventory_locker_sc_lock_stock_rest($request) {
  * REST endpoint to release stock.
  */
 function inventory_locker_sc_release_stock_rest($request) {
-    $product_id = sanitize_text_field($request->get_param('product_id'));
+    $product_id = inventory_locker_sc_prepare_product_id($request->get_param('product_id'));
     $quantity = $request->get_param('quantity');
     
     if (!$product_id) {
         return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
     }
+
+    if ($quantity !== null && $quantity !== '') {
+        $quantity = inventory_locker_prepare_positive_quantity($quantity);
+
+        if (!$quantity) {
+            return new WP_REST_Response(['success' => false, 'message' => 'Invalid parameters'], 400);
+        }
+    } else {
+        $quantity = null;
+    }
     
-    inventory_locker_sc_release_lock($product_id, $quantity ? absint($quantity) : null);
+    inventory_locker_sc_release_lock($product_id, $quantity);
     
     return new WP_REST_Response(['success' => true], 200);
 }
@@ -1280,7 +1324,7 @@ function inventory_locker_sc_get_inline_script() {
                     });
                     return await response.json();
                 } catch (e) {
-                    console.error('Inventory Locker validation error:', e);
+                    console.error('SKAmerica Inventory Locker validation error:', e);
                     return { valid: true };
                 }
             },
@@ -1297,7 +1341,7 @@ function inventory_locker_sc_get_inline_script() {
                     });
                     return await response.json();
                 } catch (e) {
-                    console.error('Inventory Locker lock error:', e);
+                    console.error('SKAmerica Inventory Locker lock error:', e);
                     return { success: false };
                 }
             },
@@ -1314,7 +1358,7 @@ function inventory_locker_sc_get_inline_script() {
                     });
                     return await response.json();
                 } catch (e) {
-                    console.error('Inventory Locker release error:', e);
+                    console.error('SKAmerica Inventory Locker release error:', e);
                     return { success: false };
                 }
             },
@@ -1330,7 +1374,7 @@ function inventory_locker_sc_get_inline_script() {
                     });
                     return await response.json();
                 } catch (e) {
-                    console.error('Inventory Locker session release error:', e);
+                    console.error('SKAmerica Inventory Locker session release error:', e);
                     return { success: false };
                 }
             },
@@ -1463,7 +1507,7 @@ function inventory_locker_sc_get_inline_script() {
         });
         
         document.addEventListener('surecart:checkout:success', function(e) {
-            console.log('Inventory Locker: Checkout complete, locks released server-side');
+            console.log('SKAmerica Inventory Locker: Checkout complete, locks released server-side');
         });
     })();
     ";

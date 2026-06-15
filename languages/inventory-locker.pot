@@ -1,10 +1,10 @@
-# Inventory Locker - Translation Template
+# SKAmerica Inventory Locker - Translation Template
 # Copyright (C) 2026 Steve Kinzey
-# This file is distributed under the same license as the Inventory Locker package.
+# This file is distributed under the same license as the SKAmerica Inventory Locker package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Inventory Locker 2.3.0\n"
+"Project-Id-Version: SKAmerica Inventory Locker 2.3.1\n"
 "Report-Msgid-Bugs-To: https://github.com/SteveKinzey/inventory-locker/issues\n"
 "POT-Creation-Date: 2026-01-28 11:33-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -16,11 +16,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: inventory-locker.php:143 inventory-locker.php:215
-msgid "Inventory Locker Settings"
+msgid "SKAmerica Inventory Locker Settings"
 msgstr ""
 
 #: inventory-locker.php:144
-msgid "Inventory Locker"
+msgid "SKAmerica Inventory Locker"
 msgstr ""
 
 #: inventory-locker.php:157
@@ -180,7 +180,7 @@ msgid "Support for products with stock management enabled"
 msgstr ""
 
 #: inventory-locker.php:361
-msgid "Inventory Locker:"
+msgid "SKAmerica Inventory Locker:"
 msgstr ""
 
 #: inventory-locker.php:362

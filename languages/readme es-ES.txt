@@ -1,4 +1,4 @@
-=== Armario de inventario ===
+=== SKAmerica Inventory Locker ===
 Colaboradores: stevekinzey
 Enlace para donaciones: https://sk-america.com
 Etiquetas: woocommerce, surecart, inventario, carrito, gestión de existencias, reserva de existencias, bloqueo de existencias, sobreventa.
@@ -13,7 +13,7 @@ URI de la licencia: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Descripción ==
 
-**Inventory Locker** evita la sobreventa al reservar el stock del producto en el momento en que se añade al carrito. Perfecto para ventas flash, ediciones limitadas y lanzamientos de productos de alta demanda.
+**SKAmerica Inventory Locker** evita la sobreventa al reservar el stock del producto en el momento en que se añade al carrito. Perfecto para ventas flash, ediciones limitadas y lanzamientos de productos de alta demanda.
 
 = El problema: la sobreventa destruye la confianza del cliente =
 
@@ -55,7 +55,7 @@ Imagina esto: estás realizando una venta flash de unas zapatillas de edición l
 
 1. Sube los archivos del plugin a `/wp-content/plugins/inventory-locker` o instálalo a través del administrador de WordPress.
 2. Actívalo a través del menú «Plugins».
-3. Ve a WooCommerce > Inventory Locker (o SureCart > Inventory Locker) para configurarlo.
+3. Ve a WooCommerce > SKAmerica Inventory Locker (o SureCart > SKAmerica Inventory Locker) para configurarlo.
 4. Establece la duración del bloqueo que desees y haz clic en «Activar plugin».
 
 **Importante:** El plugin requiere una configuración inicial antes de activarse. Esto garantiza que elijas conscientemente el tiempo de bloqueo adecuado para tu tienda.

@@ -1,10 +1,10 @@
 <?php
 /**
- * Standalone unit tests for Inventory Locker
+ * Standalone unit tests for SKAmerica Inventory Locker
  * Tests core functions without WordPress dependencies
  */
 
-echo "=== Inventory Locker Unit Tests ===\n\n";
+echo "=== SKAmerica Inventory Locker Unit Tests ===\n\n";
 
 $tests_passed = 0;
 $tests_failed = 0;

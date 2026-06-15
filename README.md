@@ -1,4 +1,4 @@
-# Inventory Locker
+# SKAmerica Inventory Locker
 
 ![License](https://img.shields.io/badge/license-GPLv2-blue)
 ![WordPress Tested](https://img.shields.io/badge/WordPress-7.0-blue)
@@ -6,7 +6,7 @@
 ![SureCart Compatible](https://img.shields.io/badge/SureCart-Compatible-blue)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-green)
 
-**Stop losing sales to overselling.** Inventory Locker reserves stock the moment a customer adds a product to their cart, preventing other shoppers from purchasing the same item. Works with WooCommerce and SureCart.
+**Stop losing sales to overselling.** SKAmerica Inventory Locker reserves stock the moment a customer adds a product to their cart, preventing other shoppers from purchasing the same item. Works with WooCommerce and SureCart.
 
 ---
 
@@ -25,11 +25,11 @@ Imagine this scenario: You're running a flash sale on a limited-edition sneaker.
 
 **🎸 Concert Merchandise Store**
 
-> "We sold 500 limited tour t-shirts in 3 minutes. Before Inventory Locker, we'd oversell by 40% and spend days issuing refunds. Now, when it's gone, it's gone—and customers trust that their order will ship."
+> "We sold 500 limited tour t-shirts in 3 minutes. Before SKAmerica Inventory Locker, we'd oversell by 40% and spend days issuing refunds. Now, when it's gone, it's gone—and customers trust that their order will ship."
 
 **👟 Sneaker Reseller**
 
-> "On hyped releases, we'd have 10x more carts than inventory. Customers would complete checkout only to get a 'sorry, out of stock' email. Inventory Locker eliminated that completely."
+> "On hyped releases, we'd have 10x more carts than inventory. Customers would complete checkout only to get a 'sorry, out of stock' email. SKAmerica Inventory Locker eliminated that completely."
 
 **🎮 Gaming Collectibles Shop**
 
@@ -37,7 +37,7 @@ Imagine this scenario: You're running a flash sale on a limited-edition sneaker.
 
 **🍷 Wine Club**
 
-> "Allocated wines sell out in hours. We had customers fighting over the last bottles at checkout. Inventory Locker made our releases fair—first to cart, first to buy."
+> "Allocated wines sell out in hours. We had customers fighting over the last bottles at checkout. SKAmerica Inventory Locker made our releases fair—first to cart, first to buy."
 
 ---
 
@@ -59,7 +59,7 @@ Imagine this scenario: You're running a flash sale on a limited-edition sneaker.
 1. Download the latest release from the [Releases page](https://github.com/SteveKinzey/inventory-locker/releases)
 2. In WordPress, go to **Plugins > Add New > Upload Plugin**
 3. Upload the `.zip` file and click **Activate**
-4. Go to **WooCommerce > Inventory Locker** (or **SureCart > Inventory Locker**) to configure
+4. Go to **WooCommerce > SKAmerica Inventory Locker** (or **SureCart > SKAmerica Inventory Locker**) to configure
 
 ### First-Time Setup Required
 
@@ -72,7 +72,7 @@ After activation, you must configure the lock duration before the plugin becomes
 ```
 Customer A adds "Limited Sneaker" to cart (5 in stock)
     ↓
-Inventory Locker reserves 1 unit for Customer A
+SKAmerica Inventory Locker reserves 1 unit for Customer A
     ↓
 Customer B sees only 4 available
     ↓

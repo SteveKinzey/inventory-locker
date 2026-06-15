@@ -1,4 +1,4 @@
-=== Inventory Locker ===
+=== SKAmerica Inventory Locker ===
 Contributors: stevekinzey
 Donate link: https://sk-america.com
 Tags: woocommerce, surecart, inventory, stock management, overselling
@@ -13,7 +13,7 @@ Stop overselling! Lock inventory when products are added to cart. Works with Woo
 
 == Description ==
 
-**Inventory Locker** prevents overselling by reserving product stock the moment it's added to the cart. Perfect for flash sales, limited editions, and high-demand product launches.
+**SKAmerica Inventory Locker** prevents overselling by reserving product stock the moment it's added to the cart. Perfect for flash sales, limited editions, and high-demand product launches.
 
 = The Problem: Overselling Destroys Customer Trust =
 
@@ -55,7 +55,7 @@ The result? 150 angry customers, cancellation emails, refund requests, negative 
 
 1. Upload the plugin files to `/wp-content/plugins/inventory-locker`, or install through the WordPress admin.
 2. Activate through the 'Plugins' menu.
-3. Go to WooCommerce > Inventory Locker (or SureCart > Inventory Locker) to configure.
+3. Go to WooCommerce > SKAmerica Inventory Locker (or SureCart > SKAmerica Inventory Locker) to configure.
 4. Set your desired lock duration and click "Activate Plugin".
 
 **Important:** The plugin requires initial configuration before it becomes active. This ensures you consciously choose the right lock timeout for your store.
