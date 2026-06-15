@@ -3,7 +3,7 @@
  * Plugin Name: SKAmerica Inventory Locker
  * Plugin URI: https://github.com/SteveKinzey/inventory-locker
  * Description: Locks inventory when a product is added to the cart, preventing overselling during high-demand periods. Supports WooCommerce and SureCart.
- * Version: 2.3.1
+ * Version: 2.3.2
  * Author: Steve Kinzey
  * Author URI: https://sk-america.com
  * License: GPLv2 or later
@@ -16,7 +16,7 @@
 
 defined('ABSPATH') || exit;
 
-define('INVENTORY_LOCKER_VERSION', '2.3.1');
+define('INVENTORY_LOCKER_VERSION', '2.3.2');
 define('INVENTORY_LOCKER_DEFAULT_DURATION', 15);
 define('INVENTORY_LOCKER_FILE', __FILE__);
 

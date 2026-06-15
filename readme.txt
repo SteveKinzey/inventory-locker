@@ -5,7 +5,7 @@ Tags: woocommerce, surecart, inventory, stock management, overselling
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,6 +85,11 @@ Yes! Version 2.0+ supports both WooCommerce and SureCart with automatic platform
 
 == Changelog ==
 
+= 2.3.2 =
+* Prepared WordPress.org resubmission package for assigned slug `skamerica-inventory-locker`.
+* Improved REST response translation coverage and inline SureCart script escaping.
+* Refreshed translation template and package ignore rules.
+
 = 2.3.1 =
 * Fixed SureCart 4.4+ product-page integration so stock locks are created before add-to-cart.
 * Added current-session lock release for SureCart cart removals.
@@ -138,6 +143,9 @@ Yes! Version 2.0+ supports both WooCommerce and SureCart with automatic platform
 * Initial stable release
 
 == Upgrade Notice ==
+
+= 2.3.2 =
+WordPress.org reviewer-readiness update for the assigned plugin slug.
 
 = 2.3.1 =
 SureCart compatibility update. Recommended for stores using SureCart product pages.
